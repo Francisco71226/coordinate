@@ -12,7 +12,7 @@
         <h1 class="text-2xl font-bold text-gray-700 text-center mb-4">COORDENADAS DAPY</h1>
         <form id="coordinateForm" class="space-y-4">
             <div>
-                <label for="coordinateType" class="block text-sm font-medium text-gray-600">Select Coordinate Type</label>
+                <label for="coordinateType" class="block text-sm font-medium text-gray-600">SELECCIONE TIPO DE COORDENADA</label>
                 <select id="coordinateType" class="w-full mt-1 p-2 border rounded-lg focus:ring focus:ring-blue-300 outline-none">
                     <option value="utm">COORDENADAS UTM</option>
                     <option value="municipales">MUNICIPALES</option>
@@ -20,13 +20,13 @@
             </div>
             <div>
                 <label for="zone" class="block text-sm font-medium text-gray-600">UTM Zona</label>
-                <input type="number" id="zone" class="w-full mt-1 p-2 border rounded-lg focus:ring focus:ring-blue-300 outline-none" placeholder="e.g., 17" required>
+                <input type="number" id="zone" class="w-full mt-1 p-2 border rounded-lg focus:ring focus:ring-blue-300 outline-none" placeholder=" 17" required value="17">
             </div>
             <div>
                 <label for="hemisphere" class="block text-sm font-medium text-gray-600">HEMISFERIO (SUR)</label>
                 <select id="hemisphere" class="w-full mt-1 p-2 border rounded-lg focus:ring focus:ring-blue-300 outline-none">
                     <option value="N">NORTE</option>
-                    <option value="S">SUR</option>
+                    <option value="S" selected>SUR</option>
                 </select>
             </div>
             <div>
