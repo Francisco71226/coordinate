@@ -1,47 +1,93 @@
-<div id="result" class="mt-4 hidden space-y-2">
-    <div>
-        <p class="text-gray-600">Google Maps Link:</p>
-        <a id="googleMapsLink" href="#" class="text-blue-500 underline break-words" target="_blank"></a>
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>UTM y Municipales a Google Maps</title>
+    <script src="https://cdn.jsdelivr.net/npm/proj4/dist/proj4.js"></script>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-100 min-h-screen flex items-center justify-center">
+
+    <div class="bg-white p-6 rounded-2xl shadow-xl w-96">
+        <h1 class="text-2xl font-bold text-gray-700 text-center mb-4">
+            COORDENADAS UTM A GOOGLE MAPS<br><br>BY: FRANCISCO CONTENTO
+        </h1>
+
+        <form id="coordinateForm" class="space-y-4">
+            <div>
+                <label for="coordinateType" class="block text-sm font-medium text-gray-600">SELECCIONE TIPO DE COORDENADA</label>
+                <select id="coordinateType" class="w-full mt-1 p-2 border rounded-lg focus:ring focus:ring-blue-300 outline-none">
+                    <option value="utm">COORDENADAS UTM</option>
+                    <option value="municipales">MUNICIPALES</option>
+                </select>
+            </div>
+          <div class="flex space-x-4">
+    <div class="w-1/2">
+        <label for="zone" class="block text-sm font-medium text-gray-600">UTM Zona</label>
+        <input type="number" id="zone" class="w-full mt-1 p-2 border rounded-lg focus:ring focus:ring-blue-300 outline-none" placeholder="17" required value="17">
     </div>
-    <div>
-        <p class="text-gray-600">Coordenadas:</p>
-        <p id="coordinates" class="text-gray-800 font-mono"></p>
+    <div class="w-1/2">
+        <label for="hemisphere" class="block text-sm font-medium text-gray-600">Hemisferio</label>
+        <select id="hemisphere" class="w-full mt-1 p-2 border rounded-lg focus:ring focus:ring-blue-300 outline-none">
+            <option value="N">NORTE</option>
+            <option value="S" selected>SUR</option>
+        </select>
     </div>
 </div>
+            <div>
+                <label for="easting" class="block text-sm font-medium text-gray-600">ESTE X (m)</label>
+                <input type="number" id="easting" step="any" class="w-full mt-1 p-2 border rounded-lg focus:ring focus:ring-blue-300 outline-none" placeholder="e.g., 500000" required>
+            </div>
+            <div>
+                <label for="northing" class="block text-sm font-medium text-gray-600">NORTE Y (m)</label>
+                <input type="number" id="northing" step="any" class="w-full mt-1 p-2 border rounded-lg focus:ring focus:ring-blue-300 outline-none" placeholder="e.g., 9999999" required>
+            </div>
+            <button type="submit" class="w-full bg-blue-600 text-white py-2 rounded-lg hover:bg-blue-700 transition">
+                Generar Link ;)
+            </button>
+        </form>
 
-<script>
-    document.getElementById('coordinateForm').addEventListener('submit', function(e) {
-        e.preventDefault();
+        <div id="result" class="mt-6 space-y-2">
+            <div>
+                <p class="text-gray-600 font-semibold">Google Maps Link:</p>
+                <a id="googleMapsLink" href="#" class="text-blue-500 underline break-words">(esperando datos)</a>
+            </div>
+            <div>
+                <p class="text-gray-600 font-semibold">Coordenadas:</p>
+                <p class="text-gray-800 font-mono">Latitud: <span id="latitude">-</span></p>
+                <p class="text-gray-800 font-mono">Longitud: <span id="longitude">-</span></p>
+            </div>
+        </div>
+    </div>
 
-        // Get input values
-        const coordinateType = document.getElementById('coordinateType').value;
-        const zone = parseInt(document.getElementById('zone').value);
-        const hemisphere = document.getElementById('hemisphere').value;
-        let easting = parseFloat(document.getElementById('easting').value);
-        const northing = parseFloat(document.getElementById('northing').value);
+    <script>
+        document.getElementById('coordinateForm').addEventListener('submit', function(e) {
+            e.preventDefault();
 
-        // Adjust easting if type is MUNICIPALES
-        if (coordinateType === 'municipales') {
-            easting += 278287;
-        }
+            const coordinateType = document.getElementById('coordinateType').value;
+            const zone = parseInt(document.getElementById('zone').value);
+            const hemisphere = document.getElementById('hemisphere').value;
+            let easting = parseFloat(document.getElementById('easting').value);
+            const northing = parseFloat(document.getElementById('northing').value);
 
-        // Define UTM projection
-        const utmProj = `+proj=utm +zone=${zone} +datum=WGS84 ${hemisphere === 'S' ? '+south' : ''}`;
+            if (coordinateType === 'municipales') {
+                easting += 278287;
+            }
 
-        // Convert UTM to lat/lon
-        const [longitude, latitude] = proj4(utmProj, '+proj=longlat +datum=WGS84', [easting, northing]);
+            const utmProj = `+proj=utm +zone=${zone} +datum=WGS84 ${hemisphere === 'S' ? '+south' : ''}`;
 
-        // Generate Google Maps link
-        const googleMapsLink = `https://www.google.com/maps?q=${latitude},${longitude}`;
+            const [longitude, latitude] = proj4(utmProj, '+proj=longlat +datum=WGS84', [easting, northing]);
 
-        // Show the results
-        document.getElementById('googleMapsLink').href = googleMapsLink;
-        document.getElementById('googleMapsLink').textContent = googleMapsLink;
+            const googleMapsLink = `https://www.google.com/maps?q=${latitude},${longitude}`;
 
-        // Mostrar lat y long
-        document.getElementById('coordinates').textContent = `Latitud: ${latitude.toFixed(6)}, Longitud: ${longitude.toFixed(6)}`;
+            document.getElementById('googleMapsLink').href = googleMapsLink;
+            document.getElementById('googleMapsLink').textContent = googleMapsLink;
 
-        document.getElementById('result').classList.remove('hidden');
-    });
-</script>
+            document.getElementById('latitude').textContent = latitude.toFixed(6);
+            document.getElementById('longitude').textContent = longitude.toFixed(6);
+        });
+    </script>
 
+</body>
+</html>
