@@ -15,6 +15,7 @@
         </h1>
 
         <form id="coordinateForm" class="space-y-4">
+
             <div>
                 <label for="coordinateType" class="block text-sm font-medium text-gray-600">SELECCIONE TIPO DE COORDENADA</label>
                 <select id="coordinateType" class="w-full mt-1 p-2 border rounded-lg focus:ring focus:ring-blue-300 outline-none">
@@ -22,32 +23,40 @@
                     <option value="municipales">MUNICIPALES</option>
                 </select>
             </div>
-          <div class="flex space-x-4">
-    <div class="w-1/2">
-        <label for="zone" class="block text-sm font-medium text-gray-600">UTM Zona</label>
-        <input type="number" id="zone" class="w-full mt-1 p-2 border rounded-lg focus:ring focus:ring-blue-300 outline-none" placeholder="17" required value="17">
-    </div>
-    <div class="w-1/2">
-        <label for="hemisphere" class="block text-sm font-medium text-gray-600">Hemisferio</label>
-        <select id="hemisphere" class="w-full mt-1 p-2 border rounded-lg focus:ring focus:ring-blue-300 outline-none">
-            <option value="N">NORTE</option>
-            <option value="S" selected>SUR</option>
-        </select>
-    </div>
-</div>
-            <div>
-                <label for="easting" class="block text-sm font-medium text-gray-600">ESTE X (m)</label>
-                <input type="number" id="easting" step="any" class="w-full mt-1 p-2 border rounded-lg focus:ring focus:ring-blue-300 outline-none" placeholder="e.g., 500000" required>
+
+            <!-- Zona y Hemisferio en una línea -->
+            <div class="flex space-x-4">
+                <div class="w-1/2">
+                    <label for="zone" class="block text-sm font-medium text-gray-600">UTM Zona</label>
+                    <input type="number" id="zone" class="w-full mt-1 p-2 border rounded-lg focus:ring focus:ring-blue-300 outline-none" placeholder="17" required value="17">
+                </div>
+                <div class="w-1/2">
+                    <label for="hemisphere" class="block text-sm font-medium text-gray-600">Hemisferio</label>
+                    <select id="hemisphere" class="w-full mt-1 p-2 border rounded-lg focus:ring focus:ring-blue-300 outline-none">
+                        <option value="N">NORTE</option>
+                        <option value="S" selected>SUR</option>
+                    </select>
+                </div>
             </div>
-            <div>
-                <label for="northing" class="block text-sm font-medium text-gray-600">NORTE Y (m)</label>
-                <input type="number" id="northing" step="any" class="w-full mt-1 p-2 border rounded-lg focus:ring focus:ring-blue-300 outline-none" placeholder="e.g., 9999999" required>
+
+            <!-- Este X y Norte Y en una línea -->
+            <div class="flex space-x-4">
+                <div class="w-1/2">
+                    <label for="easting" class="block text-sm font-medium text-gray-600">ESTE X (m)</label>
+                    <input type="number" id="easting" step="any" class="w-full mt-1 p-2 border rounded-lg focus:ring focus:ring-blue-300 outline-none" placeholder="500000" required>
+                </div>
+                <div class="w-1/2">
+                    <label for="northing" class="block text-sm font-medium text-gray-600">NORTE Y (m)</label>
+                    <input type="number" id="northing" step="any" class="w-full mt-1 p-2 border rounded-lg focus:ring focus:ring-blue-300 outline-none" placeholder="4649776" required>
+                </div>
             </div>
+
             <button type="submit" class="w-full bg-blue-600 text-white py-2 rounded-lg hover:bg-blue-700 transition">
                 Generar Link ;)
             </button>
         </form>
 
+        <!-- Resultado -->
         <div id="result" class="mt-6 space-y-2">
             <div>
                 <p class="text-gray-600 font-semibold">Google Maps Link:</p>
