@@ -24,20 +24,17 @@
         </select>
       </div>
 
-      <!-- Zona y Hemisferio -->
-      <div class="flex space-x-4">
-        <div class="w-1/2">
-          <label for="zone" class="block text-sm font-medium text-gray-600">UTM Zona</label>
-          <input type="number" id="zone" class="w-full mt-1 p-2 border rounded-lg focus:ring focus:ring-blue-300 outline-none" placeholder="17" required value="17">
-        </div>
-        <div class="w-1/2">
-          <label for="hemisphere" class="block text-sm font-medium text-gray-600">Hemisferio</label>
-          <select id="hemisphere" class="w-full mt-1 p-2 border rounded-lg focus:ring focus:ring-blue-300 outline-none">
-            <option value="N">NORTE</option>
-            <option value="S" selected>SUR</option>
-          </select>
-        </div>
-      </div>
+<!-- Zona y Hemisferio con ancho optimizado -->
+<div class="flex items-center space-x-4 mb-2">
+  <label for="zone" class="text-sm font-medium text-gray-600 whitespace-nowrap">UTM Zona:</label>
+  <input type="number" id="zone" class="w-16 p-2 border rounded-lg focus:ring focus:ring-blue-300 outline-none text-center" placeholder="17" required value="17">
+
+  <label for="hemisphere" class="text-sm font-medium text-gray-600 whitespace-nowrap">Hemisferio:</label>
+  <select id="hemisphere" class="flex-1 p-2 border rounded-lg focus:ring focus:ring-blue-300 outline-none">
+    <option value="N">NORTE</option>
+    <option value="S" selected>SUR</option>
+  </select>
+</div>
 
       <!-- Este y Norte -->
       <div class="flex space-x-4">
@@ -79,9 +76,18 @@
 
     <!-- RESULTADO: COORDENADAS -->
     <div class="mt-2">
-      <p class="text-gray-600 font-semibold">Coordenadas:</p>
+      <p class="text-gray-600 font-semibold">Coordenadas Geográficas:</p>
       <p class="text-gray-800 font-mono">Latitud: <span id="latitude">-</span></p>
       <p class="text-gray-800 font-mono">Longitud: <span id="longitude">-</span></p>
+    </div>
+
+    <!-- RESULTADO: COORDENADAS UTM -->
+    <div class="mt-2">
+      <p class="text-gray-600 font-semibold">Coordenadas UTM:</p>
+      <p class="text-gray-800 font-mono">Zona: <span id="utmZone">-</span></p>
+      <p class="text-gray-800 font-mono">Hemisferio: <span id="utmHemisphere">-</span></p>
+      <p class="text-gray-800 font-mono">Este X: <span id="utmX">-</span></p>
+      <p class="text-gray-800 font-mono">Norte Y: <span id="utmY">-</span></p>
     </div>
   </div>
 
@@ -96,11 +102,22 @@
         return;
       }
 
+      const zone = parseInt(document.getElementById('zone').value);
+      const hemisphere = document.getElementById('hemisphere').value;
+      const utmProj = `+proj=utm +zone=${zone} +datum=WGS84 ${hemisphere === 'S' ? '+south' : ''}`;
+
+      const [easting, northing] = proj4('+proj=longlat +datum=WGS84', utmProj, [lon, lat]);
+
+      // Mostrar resultados
       const googleMapsLink = `https://www.google.com/maps?q=${lat},${lon}`;
       document.getElementById('googleMapsLink').href = googleMapsLink;
       document.getElementById('googleMapsLink').textContent = googleMapsLink;
       document.getElementById('latitude').textContent = lat.toFixed(6);
       document.getElementById('longitude').textContent = lon.toFixed(6);
+      document.getElementById('utmX').textContent = easting.toFixed(2);
+      document.getElementById('utmY').textContent = northing.toFixed(2);
+      document.getElementById('utmZone').textContent = zone;
+      document.getElementById('utmHemisphere').textContent = hemisphere;
     });
 
     // Generar desde UTM o Municipales
@@ -120,11 +137,16 @@
       const utmProj = `+proj=utm +zone=${zone} +datum=WGS84 ${hemisphere === 'S' ? '+south' : ''}`;
       const [longitude, latitude] = proj4(utmProj, '+proj=longlat +datum=WGS84', [easting, northing]);
 
+      // Mostrar resultados
       const googleMapsLink = `https://www.google.com/maps?q=${latitude},${longitude}`;
       document.getElementById('googleMapsLink').href = googleMapsLink;
       document.getElementById('googleMapsLink').textContent = googleMapsLink;
       document.getElementById('latitude').textContent = latitude.toFixed(6);
       document.getElementById('longitude').textContent = longitude.toFixed(6);
+      document.getElementById('utmX').textContent = easting.toFixed(2);
+      document.getElementById('utmY').textContent = northing.toFixed(2);
+      document.getElementById('utmZone').textContent = zone;
+      document.getElementById('utmHemisphere').textContent = hemisphere;
     });
   </script>
 
