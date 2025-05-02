@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Conversión UTM / LatLon</title>
+  <title>Coordenadas a Google Maps</title>
   <script src="https://cdn.jsdelivr.net/npm/proj4/dist/proj4.js"></script>
   <script src="https://cdn.tailwindcss.com"></script>
 </head>
@@ -14,44 +14,50 @@
       COORDENADAS A GOOGLE MAPS<br><br>BY: FRANCISCO CONTENTO
     </h1>
 
-    <!-- Selección de sistema -->
-    <div class="mb-4">
-      <label for="coordinateType" class="block text-sm font-medium text-gray-600">SELECCIONE TIPO DE COORDENADA</label>
-      <select id="coordinateType" class="w-full mt-1 p-2 border rounded-lg focus:ring focus:ring-blue-300 outline-none">
-        <option value="utm">COORDENADAS UTM</option>
-        <option value="latlon">LATITUD / LONGITUD</option>
-      </select>
-    </div>
-
-    <!-- Zona y Hemisferio -->
-    <div class="flex space-x-4 mb-4">
-      <div class="w-1/2">
-        <label for="zone" class="block text-sm font-medium text-gray-600">UTM Zona</label>
-        <input type="number" id="zone" class="w-full mt-1 p-2 border rounded-lg focus:ring focus:ring-blue-300 outline-none" placeholder="17" required value="17">
-      </div>
-      <div class="w-1/2">
-        <label for="hemisphere" class="block text-sm font-medium text-gray-600">Hemisferio</label>
-        <select id="hemisphere" class="w-full mt-1 p-2 border rounded-lg focus:ring focus:ring-blue-300 outline-none">
-          <option value="N">NORTE</option>
-          <option value="S" selected>SUR</option>
+    <!-- FORMULARIO UTM -->
+    <form id="coordinateForm" class="space-y-4 mb-6">
+      <div>
+        <label for="coordinateType" class="block text-sm font-medium text-gray-600">SELECCIONE TIPO DE COORDENADA</label>
+        <select id="coordinateType" class="w-full mt-1 p-2 border rounded-lg focus:ring focus:ring-blue-300 outline-none">
+          <option value="utm">COORDENADAS UTM</option>
+          <option value="municipales">MUNICIPALES</option>
         </select>
       </div>
-    </div>
 
-    <!-- Coordenadas UTM -->
-    <div class="flex space-x-4 mb-4">
-      <div class="w-1/2">
-        <label for="easting" class="block text-sm font-medium text-gray-600">ESTE X (m)</label>
-        <input type="number" id="easting" step="any" class="w-full mt-1 p-2 border rounded-lg focus:ring focus:ring-blue-300 outline-none">
+      <!-- Zona y Hemisferio -->
+      <div class="flex space-x-4">
+        <div class="w-1/2">
+          <label for="zone" class="block text-sm font-medium text-gray-600">UTM Zona</label>
+          <input type="number" id="zone" class="w-full mt-1 p-2 border rounded-lg focus:ring focus:ring-blue-300 outline-none" placeholder="17" required value="17">
+        </div>
+        <div class="w-1/2">
+          <label for="hemisphere" class="block text-sm font-medium text-gray-600">Hemisferio</label>
+          <select id="hemisphere" class="w-full mt-1 p-2 border rounded-lg focus:ring focus:ring-blue-300 outline-none">
+            <option value="N">NORTE</option>
+            <option value="S" selected>SUR</option>
+          </select>
+        </div>
       </div>
-      <div class="w-1/2">
-        <label for="northing" class="block text-sm font-medium text-gray-600">NORTE Y (m)</label>
-        <input type="number" id="northing" step="any" class="w-full mt-1 p-2 border rounded-lg focus:ring focus:ring-blue-300 outline-none">
-      </div>
-    </div>
 
-    <!-- Coordenadas LatLon -->
-    <div class="space-y-2 mb-4">
+      <!-- Este y Norte -->
+      <div class="flex space-x-4">
+        <div class="w-1/2">
+          <label for="easting" class="block text-sm font-medium text-gray-600">ESTE X (m)</label>
+          <input type="number" id="easting" step="any" class="w-full mt-1 p-2 border rounded-lg focus:ring focus:ring-blue-300 outline-none" placeholder="500000" required>
+        </div>
+        <div class="w-1/2">
+          <label for="northing" class="block text-sm font-medium text-gray-600">NORTE Y (m)</label>
+          <input type="number" id="northing" step="any" class="w-full mt-1 p-2 border rounded-lg focus:ring focus:ring-blue-300 outline-none" placeholder="4649776" required>
+        </div>
+      </div>
+
+      <button type="submit" class="w-full bg-blue-600 text-white py-2 rounded-lg hover:bg-blue-700 transition">
+        Generar desde UTM ;)
+      </button>
+    </form>
+
+    <!-- FORMULARIO LATITUD / LONGITUD -->
+    <div class="space-y-2 mb-6">
       <div class="flex items-center space-x-2">
         <label for="inputLat" class="text-sm font-medium text-gray-600">Latitud:</label>
         <input type="number" step="any" id="inputLat" class="flex-1 p-2 border rounded-lg focus:ring focus:ring-green-300 outline-none" placeholder="-0.123456">
@@ -60,64 +66,67 @@
         <label for="inputLon" class="text-sm font-medium text-gray-600">Longitud:</label>
         <input type="number" step="any" id="inputLon" class="flex-1 p-2 border rounded-lg focus:ring focus:ring-green-300 outline-none" placeholder="-78.456789">
       </div>
+      <button id="btnLatLon" class="w-full bg-green-600 text-white py-2 rounded-lg hover:bg-green-700 transition">
+        Generar desde Lat/Lon 🌍
+      </button>
     </div>
 
-    <!-- Botón único -->
-    <button id="generateBtn" class="w-full bg-purple-600 text-white py-2 rounded-lg hover:bg-purple-700 transition">
-      Generar y Convertir
-    </button>
-
-    <!-- Resultado: LINK -->
-    <div class="mt-4">
+    <!-- RESULTADO: LINK -->
+    <div class="space-y-2">
       <p class="text-gray-600 font-semibold">Google Maps Link:</p>
       <a id="googleMapsLink" href="#" class="text-blue-500 underline break-words">(esperando datos)</a>
+    </div>
+
+    <!-- RESULTADO: COORDENADAS -->
+    <div class="mt-2">
+      <p class="text-gray-600 font-semibold">Coordenadas:</p>
+      <p class="text-gray-800 font-mono">Latitud: <span id="latitude">-</span></p>
+      <p class="text-gray-800 font-mono">Longitud: <span id="longitude">-</span></p>
     </div>
   </div>
 
   <script>
-    const btn = document.getElementById('generateBtn');
+    // Generar desde Lat/Lon directo
+    document.getElementById('btnLatLon').addEventListener('click', function () {
+      const lat = parseFloat(document.getElementById('inputLat').value);
+      const lon = parseFloat(document.getElementById('inputLon').value);
 
-    btn.addEventListener('click', function () {
-      const type = document.getElementById('coordinateType').value;
+      if (isNaN(lat) || isNaN(lon)) {
+        alert("Por favor ingresa valores válidos de latitud y longitud.");
+        return;
+      }
 
+      const googleMapsLink = `https://www.google.com/maps?q=${lat},${lon}`;
+      document.getElementById('googleMapsLink').href = googleMapsLink;
+      document.getElementById('googleMapsLink').textContent = googleMapsLink;
+      document.getElementById('latitude').textContent = lat.toFixed(6);
+      document.getElementById('longitude').textContent = lon.toFixed(6);
+    });
+
+    // Generar desde UTM o Municipales
+    document.getElementById('coordinateForm').addEventListener('submit', function (e) {
+      e.preventDefault();
+
+      const coordinateType = document.getElementById('coordinateType').value;
       const zone = parseInt(document.getElementById('zone').value);
       const hemisphere = document.getElementById('hemisphere').value;
-      const utmProj = `+proj=utm +zone=${zone} +datum=WGS84 ${hemisphere === 'S' ? '+south' : ''}`;
-      const latLonProj = `+proj=longlat +datum=WGS84`;
+      let easting = parseFloat(document.getElementById('easting').value);
+      const northing = parseFloat(document.getElementById('northing').value);
 
-      if (type === 'utm') {
-        // UTM ➜ LatLon
-        const easting = parseFloat(document.getElementById('easting').value);
-        const northing = parseFloat(document.getElementById('northing').value);
-        if (isNaN(easting) || isNaN(northing)) {
-          alert("Por favor ingresa coordenadas UTM válidas.");
-          return;
-        }
-
-        const [lon, lat] = proj4(utmProj, latLonProj, [easting, northing]);
-        document.getElementById('inputLat').value = lat.toFixed(6);
-        document.getElementById('inputLon').value = lon.toFixed(6);
-        const link = `https://www.google.com/maps?q=${lat},${lon}`;
-        document.getElementById('googleMapsLink').href = link;
-        document.getElementById('googleMapsLink').textContent = link;
-
-      } else {
-        // LatLon ➜ UTM
-        const lat = parseFloat(document.getElementById('inputLat').value);
-        const lon = parseFloat(document.getElementById('inputLon').value);
-        if (isNaN(lat) || isNaN(lon)) {
-          alert("Por favor ingresa latitud y longitud válidas.");
-          return;
-        }
-
-        const [easting, northing] = proj4(latLonProj, utmProj, [lon, lat]);
-        document.getElementById('easting').value = easting.toFixed(2);
-        document.getElementById('northing').value = northing.toFixed(2);
-        const link = `https://www.google.com/maps?q=${lat},${lon}`;
-        document.getElementById('googleMapsLink').href = link;
-        document.getElementById('googleMapsLink').textContent = link;
+      if (coordinateType === 'municipales') {
+        easting += 278287;
       }
+
+      const utmProj = `+proj=utm +zone=${zone} +datum=WGS84 ${hemisphere === 'S' ? '+south' : ''}`;
+      const [longitude, latitude] = proj4(utmProj, '+proj=longlat +datum=WGS84', [easting, northing]);
+
+      const googleMapsLink = `https://www.google.com/maps?q=${latitude},${longitude}`;
+      document.getElementById('googleMapsLink').href = googleMapsLink;
+      document.getElementById('googleMapsLink').textContent = googleMapsLink;
+      document.getElementById('latitude').textContent = latitude.toFixed(6);
+      document.getElementById('longitude').textContent = longitude.toFixed(6);
     });
   </script>
+
 </body>
 </html>
