@@ -24,17 +24,16 @@
         </select>
       </div>
 
-<!-- Zona y Hemisferio con ancho optimizado -->
-<div class="flex items-center space-x-4 mb-2">
-  <label for="zone" class="text-sm font-medium text-gray-600 whitespace-nowrap">UTM Zona:</label>
-  <input type="number" id="zone" class="w-16 p-2 border rounded-lg focus:ring focus:ring-blue-300 outline-none text-center" placeholder="17" required value="17">
+      <div class="flex items-center space-x-4 mb-2">
+        <label for="zone" class="text-sm font-medium text-gray-600 whitespace-nowrap">UTM Zona:</label>
+        <input type="number" id="zone" class="w-16 p-2 border rounded-lg focus:ring focus:ring-blue-300 outline-none text-center" placeholder="17" required value="17">
 
-  <label for="hemisphere" class="text-sm font-medium text-gray-600 whitespace-nowrap">Hemisferio:</label>
-  <select id="hemisphere" class="flex-1 p-2 border rounded-lg focus:ring focus:ring-blue-300 outline-none">
-    <option value="N">NORTE</option>
-    <option value="S" selected>SUR</option>
-  </select>
-</div>
+        <label for="hemisphere" class="text-sm font-medium text-gray-600 whitespace-nowrap">Hemisferio:</label>
+        <select id="hemisphere" class="flex-1 p-2 border rounded-lg focus:ring focus:ring-blue-300 outline-none">
+          <option value="N">NORTE</option>
+          <option value="S" selected>SUR</option>
+        </select>
+      </div>
 
       <!-- Este y Norte -->
       <div class="flex space-x-4">
@@ -71,7 +70,23 @@
     <!-- RESULTADO: LINK -->
     <div class="space-y-2">
       <p class="text-gray-600 font-semibold">Google Maps Link:</p>
-      <a id="googleMapsLink" href="#" class="text-blue-500 underline break-words">(esperando datos)</a>
+      <a id="googleMapsLink" href="#" class="text-blue-500 underline break-words" target="_blank">(esperando datos)</a>
+    </div>
+
+    <!-- MAPA EMBEBIDO -->
+    <div class="space-y-2 mt-2">
+      <p class="text-gray-600 font-semibold">Vista en Google Maps:</p>
+      <iframe
+        id="googleMapsIframe"
+        width="100%"
+        height="250"
+        frameborder="0"
+        style="border:0; border-radius: 0.75rem"
+        allowfullscreen
+        aria-hidden="false"
+        tabindex="0"
+        src="">
+      </iframe>
     </div>
 
     <!-- RESULTADO: COORDENADAS -->
@@ -118,6 +133,9 @@
       document.getElementById('utmY').textContent = northing.toFixed(2);
       document.getElementById('utmZone').textContent = zone;
       document.getElementById('utmHemisphere').textContent = hemisphere;
+
+      // Actualizar el iframe de Google Maps
+      document.getElementById('googleMapsIframe').src = `https://maps.google.com/maps?q=${lat},${lon}&z=18&output=embed`;
     });
 
     // Generar desde UTM o Municipales
@@ -147,6 +165,9 @@
       document.getElementById('utmY').textContent = northing.toFixed(2);
       document.getElementById('utmZone').textContent = zone;
       document.getElementById('utmHemisphere').textContent = hemisphere;
+
+      // Actualizar el iframe de Google Maps
+      document.getElementById('googleMapsIframe').src = `https://maps.google.com/maps?q=${latitude},${longitude}&z=18&output=embed`;
     });
   </script>
 
