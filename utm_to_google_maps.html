@@ -109,12 +109,40 @@
       <p id="gpsStatus" class="text-xs text-gray-500 mt-2"></p>
     </div>
 
-<p class="text-center text-sm text-gray-600 mt-4">
+
+<!-- CONTADOR DE VISITAS (Funciona en GitHub Pages) -->
+<p class="text-center text-sm text-gray-400 mt-4">
   🔢 Visitas: <span id="visitas">0</span></p>
 
 <p class="text-gray-400 font-mono text-right text-xs"><br>francisco71226@hotmail.com</span></p>
 
-</p>
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+  // Usa un namespace y key únicos (puedes cambiar el nombre si lo deseas)
+  const NAMESPACE = 'franciscocontento_github';
+  const KEY = 'coordenadas_a_googlemaps';
+
+  const visitasEl = document.getElementById('visitas');
+
+  fetch(`https://api.countapi.xyz/hit/${NAMESPACE}/${KEY}`)
+    .then(response => response.json())
+    .then(data => {
+      visitasEl.textContent = data.value ?? '—';
+    })
+    .catch(() => {
+      // Si CountAPI falla (por ejemplo, bloqueado por AdBlock), usa un contador local
+      let local = Number(localStorage.getItem('visitas_local') || 0) + 1;
+      localStorage.setItem('visitas_local', local);
+      visitasEl.textContent = `${local} (local)`;
+    });
+});
+</script>
+
+
+
+
+
+
 
   </div>
 
@@ -276,29 +304,6 @@
     });
   </script>
 
-<!-- CONTADOR DE VISITAS (Funciona en GitHub Pages) -->
-
-<script>
-document.addEventListener('DOMContentLoaded', () => {
-  // Usa un namespace y key únicos (puedes cambiar el nombre si lo deseas)
-  const NAMESPACE = 'franciscocontento_github';
-  const KEY = 'coordenadas_a_googlemaps';
-
-  const visitasEl = document.getElementById('visitas');
-
-  fetch(`https://api.countapi.xyz/hit/${NAMESPACE}/${KEY}`)
-    .then(response => response.json())
-    .then(data => {
-      visitasEl.textContent = data.value ?? '—';
-    })
-    .catch(() => {
-      // Si CountAPI falla (por ejemplo, bloqueado por AdBlock), usa un contador local
-      let local = Number(localStorage.getItem('visitas_local') || 0) + 1;
-      localStorage.setItem('visitas_local', local);
-      visitasEl.textContent = `${local} (local)`;
-    });
-});
-</script>
 
 
 </body>
