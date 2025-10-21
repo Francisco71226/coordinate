@@ -2,9 +2,9 @@
 <html lang="es">
 <head>
 
-  <script async src="https://counter.dev/script.js" data-id="tu-correo@ejemplo.com"></script>
+<script async src="https://counter.dev/script.js" data-id="tu-correo@ejemplo.com"></script>
 
-  
+
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Coordenadas a Google Maps</title>
@@ -109,7 +109,17 @@
       </button>
       <p id="gpsStatus" class="text-xs text-gray-500 mt-2"></p>
     </div>
+
+<p class="text-center text-sm text-gray-600 mt-4">
+  🔢 Visitas: <span id="visitas">0</span></p>
+
+<p class="text-gray-400 font-mono text-right text-xs"><br>francisco71226@hotmail.com</span></p>
+
+</p>
+
   </div>
+
+
 
   <script>
     // === CONFIGURACIÓN ===
@@ -266,6 +276,23 @@
       );
     });
   </script>
+
+<!-- CONTADOR DE VISITAS -->
+<script>
+  // Nombre único para tu página
+  const counterKey = "francisco_contento_mapa_demo";
+
+  // Crear o incrementar contador en countapi.xyz
+  fetch(`https://api.countapi.xyz/hit/${counterKey}`)
+    .then(res => res.json())
+    .then(data => {
+      document.getElementById("visitas").textContent = data.value;
+    })
+    .catch(() => {
+      document.getElementById("visitas").textContent = "—";
+    });
+</script>
+
+
 </body>
 </html>
-
