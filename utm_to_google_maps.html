@@ -14,7 +14,7 @@
       COORDENADAS A GOOGLE MAPS<br>BY: FRANCISCO CONTENTO
     </h1>
 
-    <!-- FORMULARIO UTM -->
+    <!-- FORMULARIO PRINCIPAL -->
     <form id="coordinateForm" class="space-y-4 mb-6">
       <div>
         <label for="coordinateType" class="block text-sm font-medium text-gray-600">SELECCIONE TIPO DE COORDENADA</label>
@@ -35,141 +35,159 @@
         </select>
       </div>
 
-      <!-- Este y Norte -->
       <div class="flex space-x-4">
         <div class="w-1/2">
           <label for="easting" class="block text-sm font-medium text-gray-600">ESTE X (m)</label>
-          <input type="number" id="easting" step="any" class="w-full mt-1 p-2 border rounded-lg focus:ring focus:ring-blue-300 outline-none" placeholder="500000" required>
+          <input type="text" id="easting" class="w-full mt-1 p-2 border rounded-lg focus:ring focus:ring-blue-300 outline-none" placeholder="500000" required>
         </div>
         <div class="w-1/2">
           <label for="northing" class="block text-sm font-medium text-gray-600">NORTE Y (m)</label>
-          <input type="number" id="northing" step="any" class="w-full mt-1 p-2 border rounded-lg focus:ring focus:ring-blue-300 outline-none" placeholder="4649776" required>
+          <input type="text" id="northing" class="w-full mt-1 p-2 border rounded-lg focus:ring focus:ring-blue-300 outline-none" placeholder="4649776" required>
         </div>
       </div>
 
       <button type="submit" class="w-full bg-blue-600 text-white py-2 rounded-lg hover:bg-blue-700 transition">
-        Generar desde UTM ;)
+        Generar desde UTM / Municipales
       </button>
     </form>
 
-    <!-- FORMULARIO LATITUD / LONGITUD -->
+    <!-- FORMULARIO LAT/LON -->
     <div class="space-y-2 mb-6">
       <div class="flex items-center space-x-2">
         <label for="inputLat" class="text-sm font-medium text-gray-600">Latitud:</label>
-        <input type="number" step="any" id="inputLat" class="flex-1 p-2 border rounded-lg focus:ring focus:ring-green-300 outline-none" placeholder="-0.123456">
+        <input type="text" id="inputLat" class="flex-1 p-2 border rounded-lg focus:ring focus:ring-green-300 outline-none" placeholder="-0.123456">
       </div>
       <div class="flex items-center space-x-2">
         <label for="inputLon" class="text-sm font-medium text-gray-600">Longitud:</label>
-        <input type="number" step="any" id="inputLon" class="flex-1 p-2 border rounded-lg focus:ring focus:ring-green-300 outline-none" placeholder="-78.456789">
+        <input type="text" id="inputLon" class="flex-1 p-2 border rounded-lg focus:ring focus:ring-green-300 outline-none" placeholder="-78.456789">
       </div>
       <button id="btnLatLon" class="w-full bg-green-600 text-white py-2 rounded-lg hover:bg-green-700 transition">
         Generar desde Lat/Lon 🌍
       </button>
     </div>
 
-    <!-- RESULTADO: LINK -->
+    <!-- RESULTADOS -->
     <div class="space-y-2">
       <p class="text-gray-600 font-semibold">Google Maps Link:</p>
       <a id="googleMapsLink" href="#" class="text-blue-500 underline break-words" target="_blank">(esperando datos)</a>
     </div>
 
-    <!-- MAPA EMBEBIDO -->
     <div class="space-y-2 mt-2">
       <p class="text-gray-600 font-semibold">Vista en Google Maps:</p>
-      <iframe
-        id="googleMapsIframe"
-        width="100%"
-        height="250"
-        frameborder="0"
-        style="border:0; border-radius: 0.75rem"
-        allowfullscreen
-        aria-hidden="false"
-        tabindex="0"
-        src="">
-      </iframe>
+      <iframe id="googleMapsIframe" width="100%" height="250" style="border:0; border-radius: 0.75rem" allowfullscreen></iframe>
     </div>
 
-    <!-- RESULTADO: COORDENADAS -->
     <div class="mt-2">
-      <p class="text-gray-600 font-semibold">Coordenadas Geográficas:</p>
+      <p class="text-blue-600 font-semibold">COORDENADAS GEOGRÁFICAS:</p>
       <p class="text-gray-800 font-mono">Latitud: <span id="latitude">-</span></p>
       <p class="text-gray-800 font-mono">Longitud: <span id="longitude">-</span></p>
     </div>
 
-    <!-- RESULTADO: COORDENADAS UTM -->
     <div class="mt-2">
-      <p class="text-gray-600 font-semibold">Coordenadas UTM:</p>
+      <p class="text-blue-600 font-semibold">COORDENADAS UTM:</p>
       <p class="text-gray-800 font-mono">Zona: <span id="utmZone">-</span></p>
       <p class="text-gray-800 font-mono">Hemisferio: <span id="utmHemisphere">-</span></p>
       <p class="text-gray-800 font-mono">Este X: <span id="utmX">-</span></p>
       <p class="text-gray-800 font-mono">Norte Y: <span id="utmY">-</span></p>
     </div>
+
+    <div class="mt-2">
+      <p class="text-blue-600 font-semibold">COORDENADAS MUNICIPALES:</p>
+      <p class="text-gray-800 font-mono">SIRES–DMQ-TMQ</p>
+      <p class="text-gray-800 font-mono">Este X: <span id="munX">-</span></p>
+      <p class="text-gray-800 font-mono">Norte Y: <span id="munY">-</span></p>
+    </div>
   </div>
 
   <script>
-    // Generar desde Lat/Lon directo
-    document.getElementById('btnLatLon').addEventListener('click', function () {
-      const lat = parseFloat(document.getElementById('inputLat').value);
-      const lon = parseFloat(document.getElementById('inputLon').value);
+    // === CONFIGURACIÓN ===
+    const MUN_OFFSET_E = 278287;
+    const MUN_OFFSET_N = 0;
 
+    function parseNumFlexible(str) {
+      if (typeof str !== 'string') return NaN;
+      return parseFloat(str.trim().replace(',', '.'));
+    }
+
+    function updateCommonOutputs(lat, lon) {
+      const link = `https://www.google.com/maps?q=${lat},${lon}`;
+      document.getElementById('googleMapsLink').href = link;
+      document.getElementById('googleMapsLink').textContent = link;
+      document.getElementById('latitude').textContent = lat.toFixed(6);
+      document.getElementById('longitude').textContent = lon.toFixed(6);
+      document.getElementById('googleMapsIframe').src =
+        `https://maps.google.com/maps?q=${lat},${lon}&z=18&output=embed`;
+    }
+
+    // === CONVERTIR DESDE LAT/LON ===
+    document.getElementById('btnLatLon').addEventListener('click', function () {
+      const lat = parseNumFlexible(document.getElementById('inputLat').value);
+      const lon = parseNumFlexible(document.getElementById('inputLon').value);
       if (isNaN(lat) || isNaN(lon)) {
         alert("Por favor ingresa valores válidos de latitud y longitud.");
         return;
       }
 
-      const zone = parseInt(document.getElementById('zone').value);
+      const zone = parseInt(document.getElementById('zone').value, 10);
       const hemisphere = document.getElementById('hemisphere').value;
       const utmProj = `+proj=utm +zone=${zone} +datum=WGS84 ${hemisphere === 'S' ? '+south' : ''}`;
+      const [utmE, utmN] = proj4('+proj=longlat +datum=WGS84', utmProj, [lon, lat]);
 
-      const [easting, northing] = proj4('+proj=longlat +datum=WGS84', utmProj, [lon, lat]);
+      updateCommonOutputs(lat, lon);
 
-      // Mostrar resultados
-      const googleMapsLink = `https://www.google.com/maps?q=${lat},${lon}`;
-      document.getElementById('googleMapsLink').href = googleMapsLink;
-      document.getElementById('googleMapsLink').textContent = googleMapsLink;
-      document.getElementById('latitude').textContent = lat.toFixed(6);
-      document.getElementById('longitude').textContent = lon.toFixed(6);
-      document.getElementById('utmX').textContent = easting.toFixed(2);
-      document.getElementById('utmY').textContent = northing.toFixed(2);
+      document.getElementById('utmX').textContent = utmE.toFixed(2);
+      document.getElementById('utmY').textContent = utmN.toFixed(2);
       document.getElementById('utmZone').textContent = zone;
       document.getElementById('utmHemisphere').textContent = hemisphere;
 
-      // Actualizar el iframe de Google Maps
-      document.getElementById('googleMapsIframe').src = `https://maps.google.com/maps?q=${lat},${lon}&z=18&output=embed`;
+      // Municipales derivadas restando offset
+      document.getElementById('munX').textContent = (utmE - MUN_OFFSET_E).toFixed(2);
+      document.getElementById('munY').textContent = (utmN - MUN_OFFSET_N).toFixed(2);
     });
 
-    // Generar desde UTM o Municipales
+    // === CONVERTIR DESDE UTM O MUNICIPALES ===
     document.getElementById('coordinateForm').addEventListener('submit', function (e) {
       e.preventDefault();
 
-      const coordinateType = document.getElementById('coordinateType').value;
-      const zone = parseInt(document.getElementById('zone').value);
+      const type = document.getElementById('coordinateType').value;
+      const zone = parseInt(document.getElementById('zone').value, 10);
       const hemisphere = document.getElementById('hemisphere').value;
-      let easting = parseFloat(document.getElementById('easting').value);
-      const northing = parseFloat(document.getElementById('northing').value);
 
-      if (coordinateType === 'municipales') {
-        easting += 278287;
+      const inputE = parseNumFlexible(document.getElementById('easting').value);
+      const inputN = parseNumFlexible(document.getElementById('northing').value);
+      if (isNaN(inputE) || isNaN(inputN)) {
+        alert("Por favor ingresa valores numéricos válidos para Este y Norte.");
+        return;
+      }
+
+      let utmE, utmN;
+      let munE, munN;
+
+      if (type === 'municipales') {
+        munE = inputE;
+        munN = inputN;
+        utmE = inputE + MUN_OFFSET_E;
+        utmN = inputN + MUN_OFFSET_N;
+      } else {
+        utmE = inputE;
+        utmN = inputN;
+        munE = inputE - MUN_OFFSET_E;
+        munN = inputN - MUN_OFFSET_N;
       }
 
       const utmProj = `+proj=utm +zone=${zone} +datum=WGS84 ${hemisphere === 'S' ? '+south' : ''}`;
-      const [longitude, latitude] = proj4(utmProj, '+proj=longlat +datum=WGS84', [easting, northing]);
+      const [lon, lat] = proj4(utmProj, '+proj=longlat +datum=WGS84', [utmE, utmN]);
 
-      // Mostrar resultados
-      const googleMapsLink = `https://www.google.com/maps?q=${latitude},${longitude}`;
-      document.getElementById('googleMapsLink').href = googleMapsLink;
-      document.getElementById('googleMapsLink').textContent = googleMapsLink;
-      document.getElementById('latitude').textContent = latitude.toFixed(6);
-      document.getElementById('longitude').textContent = longitude.toFixed(6);
-      document.getElementById('utmX').textContent = easting.toFixed(2);
-      document.getElementById('utmY').textContent = northing.toFixed(2);
+      updateCommonOutputs(lat, lon);
+
+      document.getElementById('utmX').textContent = utmE.toFixed(2);
+      document.getElementById('utmY').textContent = utmN.toFixed(2);
       document.getElementById('utmZone').textContent = zone;
       document.getElementById('utmHemisphere').textContent = hemisphere;
 
-      // Actualizar el iframe de Google Maps
-      document.getElementById('googleMapsIframe').src = `https://maps.google.com/maps?q=${latitude},${longitude}&z=18&output=embed`;
+      document.getElementById('munX').textContent = munE.toFixed(2);
+      document.getElementById('munY').textContent = munN.toFixed(2);
     });
   </script>
-
 </body>
 </html>
