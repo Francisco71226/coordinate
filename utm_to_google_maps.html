@@ -2,7 +2,6 @@
 <html lang="es">
 <head>
 
-<script async src="https://counter.dev/script.js" data-id="tu-correo@ejemplo.com"></script>
 
 
   <meta charset="UTF-8" />
@@ -277,20 +276,28 @@
     });
   </script>
 
-<!-- CONTADOR DE VISITAS -->
-<script>
-  // Nombre único para tu página
-  const counterKey = "francisco_contento_mapa_demo";
+<!-- CONTADOR DE VISITAS (Funciona en GitHub Pages) -->
 
-  // Crear o incrementar contador en countapi.xyz
-  fetch(`https://api.countapi.xyz/hit/${counterKey}`)
-    .then(res => res.json())
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+  // Usa un namespace y key únicos (puedes cambiar el nombre si lo deseas)
+  const NAMESPACE = 'franciscocontento_github';
+  const KEY = 'coordenadas_a_googlemaps';
+
+  const visitasEl = document.getElementById('visitas');
+
+  fetch(`https://api.countapi.xyz/hit/${NAMESPACE}/${KEY}`)
+    .then(response => response.json())
     .then(data => {
-      document.getElementById("visitas").textContent = data.value;
+      visitasEl.textContent = data.value ?? '—';
     })
     .catch(() => {
-      document.getElementById("visitas").textContent = "—";
+      // Si CountAPI falla (por ejemplo, bloqueado por AdBlock), usa un contador local
+      let local = Number(localStorage.getItem('visitas_local') || 0) + 1;
+      localStorage.setItem('visitas_local', local);
+      visitasEl.textContent = `${local} (local)`;
     });
+});
 </script>
 
 
