@@ -69,7 +69,7 @@
     <!-- RESULTADOS -->
     <div class="space-y-2">
       <p class="text-gray-600 font-semibold">Google Maps Link:</p>
-      <a id="googleMapsLink" href="#" class="text-blue-500 underline break-words" target="_blank">(esperando datos)</a>
+      <a id="googleMapsLink" href="#" class="text-blue-500 underline break-words" target="_blank" rel="noopener">(esperando datos)</a>
     </div>
 
     <div class="space-y-2 mt-2">
@@ -97,6 +97,14 @@
       <p class="text-gray-800 font-mono">Este X: <span id="munX">-</span></p>
       <p class="text-gray-800 font-mono">Norte Y: <span id="munY">-</span></p>
     </div>
+
+    <!-- BOTÓN GPS -->
+    <div class="mt-4">
+      <button id="btnGPS" class="w-full bg-red-600 text-white py-2 rounded-lg hover:bg-red-700 transition">
+        Obtener ubicación (GPS)
+      </button>
+      <p id="gpsStatus" class="text-xs text-gray-500 mt-2"></p>
+    </div>
   </div>
 
   <script>
@@ -119,7 +127,53 @@
         `https://maps.google.com/maps?q=${lat},${lon}&z=18&output=embed`;
     }
 
-    // === CONVERTIR DESDE LAT/LON ===
+    function buildUtmProj(zone, hemisphere) {
+      return `+proj=utm +zone=${zone} +datum=WGS84 ${hemisphere === 'S' ? '+south' : ''}`;
+    }
+
+    function guessUtmZone(lon) {
+      // Cálculo estándar de zona UTM a partir de la longitud
+      return Math.floor((lon + 180) / 6) + 1;
+    }
+
+    // Reutilizable: procesa lat/lon para actualizar todo
+    // useSelectedZH = true → usa los controles actuales de zona/hemisferio
+    // useSelectedZH = false → autodetecta con lat/lon
+    function processLatLon(lat, lon, useSelectedZH = true) {
+      let zone, hemisphere;
+      if (useSelectedZH) {
+        zone = parseInt(document.getElementById('zone').value, 10);
+        hemisphere = document.getElementById('hemisphere').value;
+      } else {
+        zone = guessUtmZone(lon);
+        hemisphere = lat < 0 ? 'S' : 'N';
+        // Reflejar autodetección en los controles
+        document.getElementById('zone').value = zone;
+        document.getElementById('hemisphere').value = hemisphere;
+      }
+
+      const utmProj = buildUtmProj(zone, hemisphere);
+      const [utmE, utmN] = proj4('+proj=longlat +datum=WGS84', utmProj, [lon, lat]);
+
+      // Actualiza campos geográficos
+      updateCommonOutputs(lat, lon);
+
+      // UTM
+      document.getElementById('utmX').textContent = utmE.toFixed(2);
+      document.getElementById('utmY').textContent = utmN.toFixed(2);
+      document.getElementById('utmZone').textContent = zone;
+      document.getElementById('utmHemisphere').textContent = hemisphere;
+
+      // Municipales (derivadas: UTM - offset)
+      document.getElementById('munX').textContent = (utmE - MUN_OFFSET_E).toFixed(2);
+      document.getElementById('munY').textContent = (utmN - MUN_OFFSET_N).toFixed(2);
+
+      // También rellena inputs de Lat/Lon para que el usuario los vea
+      document.getElementById('inputLat').value = lat.toFixed(6);
+      document.getElementById('inputLon').value = lon.toFixed(6);
+    }
+
+    // === CONVERTIR DESDE LAT/LON (respeta zona/hemisferio seleccionados) ===
     document.getElementById('btnLatLon').addEventListener('click', function () {
       const lat = parseNumFlexible(document.getElementById('inputLat').value);
       const lon = parseNumFlexible(document.getElementById('inputLon').value);
@@ -127,22 +181,7 @@
         alert("Por favor ingresa valores válidos de latitud y longitud.");
         return;
       }
-
-      const zone = parseInt(document.getElementById('zone').value, 10);
-      const hemisphere = document.getElementById('hemisphere').value;
-      const utmProj = `+proj=utm +zone=${zone} +datum=WGS84 ${hemisphere === 'S' ? '+south' : ''}`;
-      const [utmE, utmN] = proj4('+proj=longlat +datum=WGS84', utmProj, [lon, lat]);
-
-      updateCommonOutputs(lat, lon);
-
-      document.getElementById('utmX').textContent = utmE.toFixed(2);
-      document.getElementById('utmY').textContent = utmN.toFixed(2);
-      document.getElementById('utmZone').textContent = zone;
-      document.getElementById('utmHemisphere').textContent = hemisphere;
-
-      // Municipales derivadas restando offset
-      document.getElementById('munX').textContent = (utmE - MUN_OFFSET_E).toFixed(2);
-      document.getElementById('munY').textContent = (utmN - MUN_OFFSET_N).toFixed(2);
+      processLatLon(lat, lon, true);
     });
 
     // === CONVERTIR DESDE UTM O MUNICIPALES ===
@@ -175,7 +214,7 @@
         munN = inputN - MUN_OFFSET_N;
       }
 
-      const utmProj = `+proj=utm +zone=${zone} +datum=WGS84 ${hemisphere === 'S' ? '+south' : ''}`;
+      const utmProj = buildUtmProj(zone, hemisphere);
       const [lon, lat] = proj4(utmProj, '+proj=longlat +datum=WGS84', [utmE, utmN]);
 
       updateCommonOutputs(lat, lon);
@@ -187,6 +226,40 @@
 
       document.getElementById('munX').textContent = munE.toFixed(2);
       document.getElementById('munY').textContent = munN.toFixed(2);
+    });
+
+    // === OBTENER UBICACIÓN (GPS) ===
+    document.getElementById('btnGPS').addEventListener('click', function () {
+      const status = document.getElementById('gpsStatus');
+      if (!('geolocation' in navigator)) {
+        alert('Tu navegador no soporta geolocalización.');
+        return;
+      }
+      status.textContent = 'Solicitando ubicación…';
+
+      navigator.geolocation.getCurrentPosition(
+        (pos) => {
+          const lat = pos.coords.latitude;
+          const lon = pos.coords.longitude;
+          status.textContent = `Ubicación obtenida (precisión ~${Math.round(pos.coords.accuracy)} m).`;
+          // Autodetecta zona/hemisferio
+          processLatLon(lat, lon, false);
+        },
+        (err) => {
+          status.textContent = '';
+          const msgs = {
+            1: 'Permiso denegado. Habilita la ubicación para usar esta función.',
+            2: 'Posición no disponible.',
+            3: 'Tiempo de espera agotado.'
+          };
+          alert(msgs[err.code] || 'No se pudo obtener la ubicación.');
+        },
+        {
+          enableHighAccuracy: true,
+          timeout: 10000,
+          maximumAge: 0
+        }
+      );
     });
   </script>
 </body>
